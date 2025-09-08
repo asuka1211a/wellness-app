@@ -64,7 +64,7 @@ export async function getClass(id: string) {
 
   if (error) throw error
   return {
-    ...data,
-    instructor: data.instructors
-  } as Class
+  ...data,
+  instructor: data.instructors?.[0] as Instructor, 
+} as Class;
 }
