@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { getClasses } from '@/lib/api-mock'
 
-export const dynamic = 'force-dynamic'
+//export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export default async function ClassesPage() {
   const classes = await getClasses()
