@@ -3,7 +3,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import BookingButton from './BookingButton'
 
-export const dynamic = 'force-dynamic'
+//export const dynamic = 'force-dynamic'
+export const revalidate = 120
 
 export default async function ClassPage({
   params
