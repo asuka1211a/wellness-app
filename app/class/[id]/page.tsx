@@ -1,4 +1,4 @@
-import { getClass } from '@/lib/api-mock'
+import { getClass } from '@/lib/api'
 import Image from 'next/image'
 import Link from 'next/link'
 import BookingButton from './BookingButton'
