@@ -29,9 +29,10 @@ export default async function ClassesPage() {
                 {new Date(cls.start_at).toLocaleString('ja-JP')}
               </p>
               <p className="flex items-center gap-2">
-                <span className="text-blue-400">📍</span>
-                {cls.address}
-              </p>
+  <span className="text-blue-400">📍</span>
+  {cls.venue?.address ?? '場所未設定'}
+</p>
+
               <p className="text-lg font-medium text-gray-800 mt-4">
                 ¥{cls.price_jpy.toLocaleString()}
               </p>

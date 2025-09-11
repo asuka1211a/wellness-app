@@ -1,12 +1,27 @@
-'use client'
+// app/class/[id]/BookingButton.tsx
+'use client';
 
-export default function BookingButton() {
+import React from 'react';
+
+type Props = {
+  classId: string;
+  priceJpy: number;
+};
+
+export default function BookingButton({ classId, priceJpy }: Props) {
+  // ここは後で Stripe Checkout に差し替える。今はビルドを通す最小実装。
+  const onClick = () => {
+    console.log('book class:', { classId, priceJpy });
+    alert('仮の予約ボタンです（後でStripeに置き換え）');
+  };
+
   return (
     <button
-      className="mt-8 w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-      onClick={() => alert('予約機能は準備中です')}
+      onClick={onClick}
+      className="rounded-lg px-4 py-2 border"
+      aria-label={`Book class ${classId} (${priceJpy} JPY)`}
     >
-      予約する
+      予約する（{priceJpy.toLocaleString()}円）
     </button>
-  )
+  );
 }
