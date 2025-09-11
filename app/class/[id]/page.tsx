@@ -1,7 +1,6 @@
 // app/class/[id]/page.tsx
 
 import { getClassById } from '@/lib/api'
-import Image from 'next/image'
 import Link from 'next/link'
 import BookingButton from './BookingButton'
 
