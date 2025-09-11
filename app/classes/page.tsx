@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getClasses } from '@/lib/api-mock'
+import { getClasses } from '@/lib/api'
 
 //export const dynamic = 'force-dynamic'
 export const revalidate = 60
