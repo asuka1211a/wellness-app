@@ -11,22 +11,21 @@
           BR="ai/issue-${{ github.event.issue.number || github.run_id }}"
           git checkout -b "$BR"
 
-          # 使うモデル（前ステップの出力）
           MODEL="${{ steps.model.outputs.model }}"
 
-          # APIキーが存在するものだけフラグに追加
-          FLAGS="--model \"$MODEL\" --commit --yes --message-file .aider/issue.txt --include app lib types public --no-include .github sql supabase node_modules .next --edit-format diff"
+          # 使えるキーだけフラグに追加
+          FLAGS="--model \"$MODEL\" --commit --yes --message-file .aider/issue.txt --edit-format diff"
           if [ -n "$OPENAI_API_KEY" ]; then
             FLAGS="$FLAGS --openai-api-key \"$OPENAI_API_KEY\""
           fi
-          if [ -n \"$ANTHROPIC_API_KEY\" ]; then
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
             FLAGS="$FLAGS --anthropic-api-key \"$ANTHROPIC_API_KEY\""
           fi
 
-          # Aider 実行
+          # Aider 実行（対象ファイルの指定はせず、Aiderに任せる）
           eval aider $FLAGS
 
-          # 変更があったら push（なければスキップ）
+          # 変更があればコミットを追加して push
           if ! git diff --quiet; then
             git add -A
             git commit -m "feat(ai): apply changes for issue #${{ github.event.issue.number || github.run_id }}"
