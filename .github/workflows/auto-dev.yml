@@ -12,7 +12,6 @@ permissions:
 
 jobs:
   build:
-    # 手動起動 or ai-dev ラベルの issue だけ実行
     if: |
       github.event_name == 'workflow_dispatch' ||
       contains(github.event.issue.labels.*.name, 'ai-dev')
@@ -35,9 +34,12 @@ jobs:
       - name: Prepare prompt
         run: |
           mkdir -p .aider
-          echo "${{ github.event.issue.title }}" > .aider/issue.txt || true
-          echo "" >> .aider/issue.txt || true
-          echo "${{ github.event.issue.body }}" >> .aider/issue.txt || true
+          # heredocにしてシェル展開エスケープ
+          cat > .aider/issue.txt <<'EOF'
+          ${{ github.event.issue.title }}
+
+          ${{ github.event.issue.body }}
+          EOF
 
       - name: Choose model & flags
         id: model
@@ -48,7 +50,7 @@ jobs:
             echo "model=openai/gpt-4.1" >> $GITHUB_OUTPUT
           fi
 
-            - name: Run AI change (Aider)
+      - name: Run AI change (Aider)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -59,17 +61,22 @@ jobs:
           BR="ai/issue-${{ github.event.issue.number || github.run_id }}"
           git checkout -b "$BR"
 
+          # ここでは . (リポジトリルート) だけ渡して、
+          # 無視したいものは .aiderignore に書く
+          echo ".git/" > .aiderignore
+          echo ".github/" >> .aiderignore
+          echo "node_modules/" >> .aiderignore
+          echo ".next/" >> .aiderignore
+          echo "supabase/" >> .aiderignore
+          echo "sql/" >> .aiderignore
+
           aider \
             --model "${{ steps.model.outputs.model }}" \
             --commit \
             --yes \
             --message-file .aider/issue.txt \
-            --include "app/**/*.ts" \
-            --include "app/**/*.tsx" \
-            --include "lib/**/*.ts" \
-            --include "types/**/*.ts" \
-            --include "public/**/*" \
-            --edit-format diff
+            --edit-format diff \
+            .
 
           git push -u origin "$BR"
 
