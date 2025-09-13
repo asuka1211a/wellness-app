@@ -43,10 +43,10 @@ jobs:
       - name: Choose model
         id: model
         run: |
-          if [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
-            echo "model=anthropic/claude-3.5-sonnet" >> $GITHUB_OUTPUT
-          elif [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then
+          if [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then
             echo "model=openai/gpt-4o-mini" >> $GITHUB_OUTPUT
+          elif [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "model=anthropic/claude-3.5-sonnet" >> $GITHUB_OUTPUT
           else
             echo "No API key configured." >&2
             exit 1
