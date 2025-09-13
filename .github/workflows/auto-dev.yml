@@ -59,25 +59,18 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           set -e
-
           git config user.name  "ai-bot"
           git config user.email "ai-bot@users.noreply.github.com"
-
           BR="ai/issue-${{ github.event.issue.number || github.run_id }}"
-          # 既に同名ブランチがあっても失敗しないように
           git checkout -B "$BR"
 
-          # リポジトリ「.」を明示し、編集対象は include で限定
-          aider . \
+          # --include は使わず、対象ディレクトリをそのまま引数で渡す
+          aider . app lib types public \
             --model "${{ steps.model.outputs.model }}" \
             --message-file .aider/issue.txt \
             --commit \
             --yes \
-            --edit-format diff \
-            --include app \
-            --include lib \
-            --include types \
-            --include public
+            --edit-format diff
 
           git push -u origin "$BR"
 
