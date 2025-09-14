@@ -2,62 +2,93 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { APP_URL } from '@/lib/constants';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [exchanging, setExchanging] = useState(
-    typeof window !== 'undefined' && window.location.href.includes('access_token')
-  );
+  const [processing, setProcessing] = useState(false);
 
-  // Magic Linkからのリダイレクトをチェック
   useEffect(() => {
-    const handleAuth = async () => {
-      const hasToken = window.location.hash && window.location.hash.includes('access_token');
-      console.log('認証状態チェック:', { hasToken, hash: window.location.hash });
-
-      if (hasToken) {
-        setExchanging(true);
+    const handleMagicLink = async () => {
+      // URLフラグメントからトークンを取得
+      const hashFragment = window.location.hash.substring(1);
+      const params = new URLSearchParams(hashFragment);
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      
+      if (accessToken && refreshToken) {
+        console.log('マジックリンクトークン検出');
+        setProcessing(true);
+        
         try {
-          const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-          console.log('セッション交換結果:', { data, error });
-
+          // セッションを設定
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
           if (error) {
-            console.error('認証エラー:', error);
+            console.error('セッション設定エラー:', error);
             alert('認証に失敗しました: ' + error.message);
           } else {
-            console.log('認証成功、dashboardへ遷移します');
+            console.log('認証成功、ダッシュボードへリダイレクト');
+            // URLフラグメントをクリア
+            window.history.replaceState({}, document.title, window.location.pathname);
+            // ダッシュボードへリダイレクト
             router.replace('/dashboard');
           }
-        } catch (err) {
-          console.error('予期せぬエラー:', err);
+        } catch (error) {
+          console.error('認証処理エラー:', error);
           alert('認証処理中にエラーが発生しました');
         } finally {
-          setExchanging(false);
+          setProcessing(false);
         }
       }
     };
 
-    handleAuth();
+    handleMagicLink();
   }, [router]);
 
   const handleLogin = async () => {
     setLoading(true);
+    
+    // 環境に応じてリダイレクトURLを設定
+    const isProduction = typeof window !== 'undefined' && 
+      window.location.hostname !== 'localhost' && 
+      !window.location.hostname.includes('github.dev');
+    
+    const redirectUrl = isProduction 
+      ? 'https://wellness-app.vercel.app/login'
+      : window.location.origin + '/login';
+    
+    console.log('送信設定:', { email, redirectUrl });
+    
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${APP_URL}/login`,
+        emailRedirectTo: redirectUrl,
       },
     });
+    
     setLoading(false);
-    if (error) alert(error.message);
-    else alert('メールをチェックしてログインリンクをクリックしてください');
+    
+    if (error) {
+      console.error('送信エラー:', error);
+      alert(`エラー: ${error.message}`);
+    } else {
+      console.log('メール送信成功');
+      alert('認証メールを送信しました。メールのリンクをクリックしてログインしてください。');
+    }
   };
 
-  if (exchanging) {
-    return <div style={{ padding: 40 }}>認証中です…</div>;
+  if (processing) {
+    return (
+      <div style={{ padding: 40 }}>
+        <h1>認証中...</h1>
+        <p>しばらくお待ちください</p>
+      </div>
+    );
   }
 
   return (

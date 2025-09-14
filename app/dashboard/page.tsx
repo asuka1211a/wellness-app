@@ -10,31 +10,43 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Magic Link認証後のハッシュからトークンを取得し、セッションをセット
-    if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
-      const params = new URLSearchParams(window.location.hash.slice(1));
-      const access_token = params.get('access_token');
-      const refresh_token = params.get('refresh_token');
-      if (access_token && refresh_token) {
-        supabase.auth.setSession({ access_token, refresh_token });
-        window.location.hash = '';
-      }
-    }
-    // セッション確認して、いなければ /login へ
-    supabase.auth.getUser().then(({ data }) => {
-      const user = data.user;
-      if (!user) {
+    const checkSession = async () => {
+      console.log('Dashboard: セッション確認開始');
+      
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Dashboard: 現在のセッション状態:', session);
+        
+        if (!session) {
+          console.log('Dashboard: セッションなし、ログインページへリダイレクト');
+          window.location.href = '/login';
+          return;
+        }
+
+        const { data: { user } } = await supabase.auth.getUser();
+        console.log('Dashboard: ユーザー情報:', user);
+        
+        if (!user) {
+          console.log('Dashboard: ユーザー情報なし、ログインページへリダイレクト');
+          window.location.href = '/login';
+        } else {
+          console.log('Dashboard: ユーザー情報取得成功');
+          setEmail(user.email ?? null);
+        }
+      } catch (error) {
+        console.error('Dashboard: セッション確認エラー:', error);
         router.replace('/login');
-      } else {
-        setEmail(user.email ?? null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
+
+    checkSession();
   }, [router]);
 
   const logout = async () => {
     await supabase.auth.signOut();
-    router.replace('/login');
+    window.location.href = '/login';
   };
 
   if (loading) return <div style={{ padding: 24 }}>Loading...</div>;
