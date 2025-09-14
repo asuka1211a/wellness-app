@@ -25,9 +25,31 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`} 
+        style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          padding: '0',
+        }}
       >
-        {children}
+        <div style={{
+          width: '100%',
+          maxWidth: '700px',
+          margin: '2rem auto',
+          padding: '2rem',
+          borderRadius: '24px',
+          background: 'rgba(255,255,255,0.55)',
+          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.18)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255,255,255,0.3)',
+          transition: 'box-shadow 0.3s',
+        }} className="glass-card">
+          {children}
+        </div>
       </body>
     </html>
   );
