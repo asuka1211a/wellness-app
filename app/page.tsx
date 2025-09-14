@@ -1,6 +1,6 @@
 'use client';
-import Header from "../components/Header";   // ← ここを修正
-import Hero from "../components/Hero";       // ← ここも修正
+import Header from "./components/Header";
+import Hero from "./components/Hero";
 
 export default function Home() {
   return (
