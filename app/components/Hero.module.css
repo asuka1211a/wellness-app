@@ -1,0 +1,38 @@
+.container {
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.icon {
+  margin: 1rem auto;
+  filter: drop-shadow(0 2px 16px #a1c4fd);
+}
+
+.buttons {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeInUp {
+  animation: fadeInUp 1.2s ease forwards;
+}
+
+.fadeInUpSlow {
+  animation: fadeInUp 1.5s ease forwards;
+  background: linear-gradient(90deg, #fbc2eb 0%, #a6c1ee 100%);
+}
