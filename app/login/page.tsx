@@ -1,54 +1,10 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [processing, setProcessing] = useState(false);
-
-  useEffect(() => {
-    const handleMagicLink = async () => {
-      // URLフラグメントからトークンを取得
-      const hashFragment = window.location.hash.substring(1);
-      const params = new URLSearchParams(hashFragment);
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
-      
-      if (accessToken && refreshToken) {
-        console.log('マジックリンクトークン検出');
-        setProcessing(true);
-        
-        try {
-          // セッションを設定
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken
-          });
-          
-          if (error) {
-            console.error('セッション設定エラー:', error);
-            alert('認証に失敗しました: ' + error.message);
-          } else {
-            console.log('認証成功、ダッシュボードへリダイレクト');
-            // URLフラグメントをクリア
-            window.history.replaceState({}, document.title, window.location.pathname);
-            // ダッシュボードへリダイレクト
-            router.replace('/dashboard');
-          }
-        } catch (error) {
-          console.error('認証処理エラー:', error);
-          alert('認証処理中にエラーが発生しました');
-        } finally {
-          setProcessing(false);
-        }
-      }
-    };
-
-    handleMagicLink();
-  }, [router]);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -59,8 +15,8 @@ export default function LoginPage() {
       !window.location.hostname.includes('github.dev');
     
     const redirectUrl = isProduction 
-      ? 'https://wellness-app.vercel.app/login'
-      : window.location.origin + '/login';
+      ? 'https://wellness-app.vercel.app/auth/callback'
+      : window.location.origin + '/auth/callback';
     
     console.log('送信設定:', { email, redirectUrl });
     
@@ -81,15 +37,6 @@ export default function LoginPage() {
       alert('認証メールを送信しました。メールのリンクをクリックしてログインしてください。');
     }
   };
-
-  if (processing) {
-    return (
-      <div style={{ padding: 40 }}>
-        <h1>認証中...</h1>
-        <p>しばらくお待ちください</p>
-      </div>
-    );
-  }
 
   return (
     <div style={{ padding: 40 }}>
