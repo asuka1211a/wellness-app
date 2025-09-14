@@ -8,41 +8,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Magic Linkで戻ってきたときにトークン処理
+  // Magic Linkからのリダイレクトをチェック
   useEffect(() => {
-    const handleAuthCallback = async () => {
-      // URLフラグメントからトークンを取得
-      const hashFragment = window.location.hash.substring(1);
-      const params = new URLSearchParams(hashFragment);
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
-      
-      if (accessToken && refreshToken) {
-        try {
-          // セッションを設定
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken
-          });
-          
-          if (!error) {
-            // URLフラグメントをクリーンアップ
-            window.history.replaceState({}, document.title, window.location.pathname);
-            router.replace('/dashboard');
-          }
-        } catch (error) {
-          console.error('Auth error:', error);
-        }
-      } else {
-        // PKCEフローの場合（念のため残しておく）
-        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-        if (!error) {
-          router.replace('/dashboard');
-        }
-      }
-    };
-    
-    handleAuthCallback();
+    if (window.location.hash.includes('access_token')) {
+      // アクセストークンがある場合はダッシュボードにリダイレクト
+      router.replace('/dashboard');
+    }
   }, [router]);
 
   const handleLogin = async () => {
